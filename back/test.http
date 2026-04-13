@@ -1,0 +1,96 @@
+@baseUrl = http://localhost:8080
+@contentType = application/json
+
+###
+# 0) Sanity: endpoint protégé sans token => 401
+GET {{baseUrl}}/api/v1/aventuriers
+
+###
+# 1) Register (PUBLIC) : crée un VIEWER par défaut
+POST {{baseUrl}}/auth/register
+Content-Type: {{contentType}}
+
+{
+  "username": "cdrouet",
+  "password": "cdrouetpwd"
+}
+
+###
+# 2) Login (PUBLIC) : récupère un JWT VIEWER
+# Copie le accessToken de la réponse dans la variable @viewerToken ci-dessous.
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "username": "cdrouet",
+  "password": "cdrouetpwd"
+}
+
+###
+# Mets ici le token VIEWER récupéré au login/register
+@viewerToken = REPLACE_ME
+
+###
+# 3) Lire la liste (VIEWER ou ADMIN) => 200 si token OK
+GET {{baseUrl}}/api/v1/aventuriers
+Authorization: Bearer {{viewerToken}}
+
+###
+# 4) Tentative de création (ADMIN only) avec un token VIEWER => 403
+POST {{baseUrl}}/api/v1/aventuriers
+Content-Type: {{contentType}}
+Authorization: Bearer {{viewerToken}}
+
+{
+  "nom": "Gandalf",
+  "description": "Magicien",
+  "physique": 40,
+  "mental": 95,
+  "perception": 90,
+  "classe": "MAGE"
+}
+
+###
+# 5) Login ADMIN (seed au démarrage) : admin/admin => JWT ADMIN
+# Copie le accessToken dans @adminToken.
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+###
+@adminToken = REPLACE_ME
+
+###
+# 6) Création (ADMIN) => 201 si token ADMIN OK
+POST {{baseUrl}}/api/v1/aventuriers
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "nom": "Aragorn",
+  "description": "Roi du Gondor",
+  "physique": 85,
+  "mental": 70,
+  "perception": 80,
+  "classe": "GUERRIER"
+}
+
+###
+# 7) Token invalide => 401
+GET {{baseUrl}}/api/v1/aventuriers
+Authorization: Bearer invalid.token.value
+
+###
+# 8) Logout (VIEWER ou ADMIN) => 204
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{viewerToken}}
+
+###
+# 9) Rejouer le token après logout => 401 (token révoqué)
+GET {{baseUrl}}/api/v1/aventuriers
+Authorization: Bearer {{viewerToken}}
+

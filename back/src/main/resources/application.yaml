@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: fantasy-world
+
+  datasource:
+    url: jdbc:h2:mem:fantasyworld
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  data:
+    mongodb:
+      database: fantasy-world-logs
+
+  mongodb:
+    uri: mongodb://localhost:27018/fantasy
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 7.0.9
+
+app:
+  jwt:
+    # Secret HS256 encodé en Base64
+    # En prod : variable d'env / vault / secret manager.
+    secret: dSrE+nKozsf8FrKoAWsPiWRILLb3WWXLBYRqkZ8u7G8=
+    issuer: template-security
+    exp-minutes: 60
