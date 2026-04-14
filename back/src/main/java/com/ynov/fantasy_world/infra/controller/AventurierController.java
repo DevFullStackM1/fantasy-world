@@ -1,9 +1,7 @@
 package com.ynov.fantasy_world.infra.controller;
 
 import com.ynov.fantasy_world.generated.api.AventurierApi;
-import com.ynov.fantasy_world.generated.model.Aventurier;
-import com.ynov.fantasy_world.generated.model.AventurierCreate;
-import com.ynov.fantasy_world.generated.model.AventurierUpdate;
+import com.ynov.fantasy_world.generated.model.*;
 import com.ynov.fantasy_world.infra.mapper.AventurierOpenApiMapper;
 import com.ynov.fantasy_world.service.AventurierService;
 import jakarta.validation.Valid;
@@ -14,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -42,6 +41,31 @@ public class AventurierController implements AventurierApi {
     public ResponseEntity<Aventurier> getAventurierById(@NotNull Long id) {
         var aventurier = aventurierService.getAventurierById(id);
         return ResponseEntity.ok(openApiMapper.toGenerated(aventurier));
+    }
+
+    @Override
+    public ResponseEntity<List<AventurierRef>> getAventuriersByCompetenceId(UUID id) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<List<Competence>> getCompetencesByAventurierId(Long id) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<List<Competence>> getCompetencesDisponiblesByAventurierId(Long id) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<Void> removeCompetenceFromAventurier(Long id, UUID cId) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<Void> addCompetenceToAventurier(Long id, UUID cId) {
+        return null;
     }
 
     @Override
