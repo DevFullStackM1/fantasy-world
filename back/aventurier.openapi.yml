@@ -9,6 +9,8 @@ tags:
     description: Opérations liées aux aventuriers
   - name: Auth
     description: Opérations d'authentification
+  - name: Competence
+    description: Opérations liées aux compétences
 
 servers:
   - url: http://localhost:8080
@@ -370,6 +372,561 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetail'
 
+  /api/v1/competences:
+    get:
+      summary: Liste toutes les compétences
+      description: Retourne la liste des compétences. Rôle requis -> VIEWER
+      operationId: getAllCompetences
+      tags:
+        - Competence
+      responses:
+        '200':
+          description: Liste des compétences
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Competence'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+    post:
+      summary: Crée une nouvelle compétence
+      description: Crée une nouvelle compétence. Rôle requis -> ADMIN
+      operationId: createCompetence
+      tags:
+        - Competence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompetenceCreate'
+      responses:
+        '201':
+          description: Compétence créée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Competence'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '409':
+          description: Conflict - Violation de règle métier (ex. nom unique, prérequis incohérents)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+  /api/v1/competences/{id}:
+    get:
+      summary: Récupère une compétence par son identifiant
+      description: Retourne le détail d'une compétence. Rôle requis -> VIEWER
+      operationId: getCompetenceById
+      tags:
+        - Competence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant de la compétence
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Compétence trouvée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Competence'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+    put:
+      summary: Met à jour une compétence
+      description: Met à jour une compétence. Rôle requis -> ADMIN
+      operationId: updateCompetence
+      tags:
+        - Competence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant de la compétence
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompetenceUpdate'
+      responses:
+        '200':
+          description: Compétence mise à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Competence'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '409':
+          description: Conflict - Violation de règle métier (ex. invalide des aventuriers existants)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+    delete:
+      summary: Supprime une compétence
+      description: Supprime une compétence. Rôle requis -> ADMIN
+      operationId: deleteCompetence
+      tags:
+        - Competence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant de la compétence
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Compétence supprimée
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '409':
+          description: Conflict - Violation de règle métier (ex. compétence requise par une autre)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+  /api/v1/aventuriers/{id}/competences:
+    get:
+      summary: Liste les compétences d'un aventurier
+      description: Retourne les compétences possédées par un aventurier. Rôle requis -> VIEWER
+      operationId: getCompetencesByAventurierId
+      tags:
+        - Aventurier
+        - Competence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant de l'aventurier
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Liste des compétences de l'aventurier
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Competence'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+  /api/v1/aventuriers/{id}/competences/disponibles:
+    get:
+      summary: Liste les compétences disponibles pour un aventurier
+      description: Retourne les compétences accessibles (prérequis remplis et non déjà possédées). Rôle requis -> VIEWER
+      operationId: getCompetencesDisponiblesByAventurierId
+      tags:
+        - Aventurier
+        - Competence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant de l'aventurier
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Liste des compétences disponibles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Competence'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+  /api/v1/aventuriers/{id}/competences/{cId}:
+    post:
+      summary: Attribue une compétence à un aventurier
+      description: Attribue une compétence si les prérequis sont respectés. Rôle requis -> ADMIN
+      operationId: addCompetenceToAventurier
+      tags:
+        - Aventurier
+        - Competence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant de l'aventurier
+          schema:
+            type: integer
+            format: int64
+        - name: cId
+          in: path
+          required: true
+          description: Identifiant de la compétence
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Compétence attribuée
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '409':
+          description: Conflict - Violation d'invariant métier (prérequis non remplis)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+    delete:
+      summary: Retire une compétence d'un aventurier
+      description: Retire une compétence si elle n'est pas prérequis d'une autre déjà possédée. Rôle requis -> ADMIN
+      operationId: removeCompetenceFromAventurier
+      tags:
+        - Aventurier
+        - Competence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant de l'aventurier
+          schema:
+            type: integer
+            format: int64
+        - name: cId
+          in: path
+          required: true
+          description: Identifiant de la compétence
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Compétence retirée
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '409':
+          description: Conflict - Violation d'invariant métier (compétence requise par une autre possédée)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+  /api/v1/competences/{id}/aventuriers:
+    get:
+      summary: Liste les aventuriers possédant une compétence
+      description: Retourne la liste des aventuriers qui possèdent la compétence. Rôle requis -> VIEWER
+      operationId: getAventuriersByCompetenceId
+      tags:
+        - Aventurier
+        - Competence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant de la compétence
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Liste des aventuriers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AventurierRef'
+        '400':
+          description: Bad Request
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '401':
+          description: Unauthorized
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Forbidden
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '404':
+          description: Not Found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '500':
+          description: Internal Server Error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -415,6 +972,94 @@ components:
         - SORCIER
         - PALADIN
         - BARD
+
+    Caracteristique:
+      type: string
+      description: Caractéristique d'un aventurier
+      enum:
+        - PHYSIQUE
+        - MENTAL
+        - PERCEPTION
+
+    CaracteristiqueMin:
+      type: object
+      description: Prérequis sur une caractéristique (valeur minimale)
+      properties:
+        caracteristique:
+          $ref: '#/components/schemas/Caracteristique'
+        valeur:
+          type: integer
+          format: int32
+      required:
+        - caracteristique
+        - valeur
+
+    PrerequisCompetence:
+      type: object
+      description: Prérequis d'une compétence (tous optionnels)
+      properties:
+        classeRequise:
+          $ref: '#/components/schemas/Classe'
+        niveauMinimum:
+          type: integer
+          format: int32
+          minimum: 1
+        caracteristiquesMin:
+          $ref: '#/components/schemas/CaracteristiqueMin'
+        competencesRequises:
+          type: array
+          description: Liste d'identifiants de compétences requises (déjà connues)
+          items:
+            type: string
+            format: uuid
+
+    CompetenceRef:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Identifiant unique de la compétence (UUID)
+      required:
+        - id
+
+    CompetenceEditableAttributes:
+      type: object
+      description: Champs éditables d'une compétence
+      properties:
+        nom:
+          type: string
+          description: Nom unique de la compétence
+        description:
+          type: string
+          description: Description de la compétence
+        prerequis:
+          $ref: '#/components/schemas/PrerequisCompetence'
+
+    Competence:
+      allOf:
+        - $ref: '#/components/schemas/CompetenceRef'
+        - $ref: '#/components/schemas/CompetenceEditableAttributes'
+        - type: object
+          required:
+            - id
+            - nom
+
+    CompetenceCreate:
+      description: Données pour créer une compétence. Si les prérequis sont tous null/vide, la compétence est accessible à tous (cas valide).
+      allOf:
+        - $ref: '#/components/schemas/CompetenceEditableAttributes'
+        - type: object
+          required:
+            - nom
+
+    CompetenceUpdate:
+      description: Données pour mettre à jour une compétence. La mise à jour ne doit pas invalider des aventuriers qui la possèdent déjà.
+      allOf:
+        - $ref: '#/components/schemas/CompetenceEditableAttributes'
+        - type: object
+          required:
+            - nom
 
     AventurierRef:
       type: object
