@@ -2,6 +2,10 @@ import { Link, Navigate, Route, Routes } from 'react-router-dom'
 import AventurierCreatePage from './pages/AventurierCreatePage'
 import AventurierDetailPage from './pages/AventurierDetailPage'
 import AventuriersListPage from './pages/AventuriersListPage'
+import CompetencesListPage from './pages/CompetencesListPage'
+import CompetenceDetailPage from './pages/CompetenceDetailPage'
+import CompetenceCreatePage from './pages/CompetenceCreatePage'
+import CompetenceEditPage from './pages/CompetenceEditPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ForbiddenPage from './pages/ForbiddenPage'
@@ -19,14 +23,17 @@ export default function App() {
     <div className="app">
       <header className="appHeader">
         <div className="appHeader__inner">
-          <h1 className="appHeader__title">Aventuriers</h1>
+          <h1 className="appHeader__title">Fantasy World</h1>
           <nav className="appHeader__nav" aria-label="Navigation principale">
             <Link to="/aventuriers" className="navLink">
-              Liste
+              Aventuriers
+            </Link>
+            <Link to="/competences" className="navLink">
+              Compétences
             </Link>
             {isAuthenticated && isAdmin ? (
               <Link to="/aventuriers/nouveau" className="navLink navLink--primary">
-                Créer
+                Créer aventurier
               </Link>
             ) : null}
             {isAuthenticated ? (
@@ -69,6 +76,13 @@ export default function App() {
             <Route path="/aventuriers/:id" element={<AventurierDetailPage />} />
             <Route element={<RequireRole role="ADMIN" />}>
               <Route path="/aventuriers/nouveau" element={<AventurierCreatePage />} />
+            </Route>
+
+            <Route path="/competences" element={<CompetencesListPage />} />
+            <Route path="/competences/:id" element={<CompetenceDetailPage />} />
+            <Route element={<RequireRole role="ADMIN" />}>
+              <Route path="/competences/nouvelle" element={<CompetenceCreatePage />} />
+              <Route path="/competences/:id/modifier" element={<CompetenceEditPage />} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/login" replace />} />

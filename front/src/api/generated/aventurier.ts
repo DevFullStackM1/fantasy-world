@@ -323,6 +323,26 @@ export interface components {
         CompetenceCreate: components["schemas"]["CompetenceEditableAttributes"] & Record<string, never>;
         /** @description Données pour mettre à jour une compétence. La mise à jour ne doit pas invalider des aventuriers qui la possèdent déjà. */
         CompetenceUpdate: components["schemas"]["CompetenceEditableAttributes"] & Record<string, never>;
+        /** @description Compétence non acquise avec les prérequis manquants */
+        CompetencesBloqueesItem: {
+            competence?: components["schemas"]["Competence"];
+            /** @description Liste lisible des prérequis non satisfaits */
+            prerequisManquants?: string[];
+        };
+        /** @description Compétences acquérables et bloquées pour un aventurier */
+        CompetencesDisponibles: {
+            /** @description Compétences non encore acquises dont tous les prérequis sont satisfaits */
+            acquerables?: components["schemas"]["Competence"][];
+            /** @description Compétences non acquises avec leurs prérequis manquants */
+            bloquees?: components["schemas"]["CompetencesBloqueesItem"][];
+        };
+        /** @description Possesseurs et aventuriers éligibles pour une compétence */
+        AventuriersByCompetence: {
+            /** @description Aventuriers qui possèdent déjà cette compétence */
+            possesseurs?: components["schemas"]["Aventurier"][];
+            /** @description Aventuriers qui pourraient acquérir cette compétence maintenant */
+            eligibles?: components["schemas"]["Aventurier"][];
+        };
         AventurierRef: {
             /**
              * Format: int64
@@ -1286,13 +1306,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Liste des compétences disponibles */
+            /** @description Compétences acquérables et bloquées pour l'aventurier */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Competence"][];
+                    "application/json": components["schemas"]["CompetencesDisponibles"];
                 };
             };
             /** @description Bad Request */
@@ -1508,13 +1528,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Liste des aventuriers */
+            /** @description Possesseurs et aventuriers éligibles */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AventurierRef"][];
+                    "application/json": components["schemas"]["AventuriersByCompetence"];
                 };
             };
             /** @description Bad Request */

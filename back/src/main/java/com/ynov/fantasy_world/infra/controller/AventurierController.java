@@ -3,7 +3,9 @@ package com.ynov.fantasy_world.infra.controller;
 import com.ynov.fantasy_world.generated.api.AventurierApi;
 import com.ynov.fantasy_world.generated.model.*;
 import com.ynov.fantasy_world.infra.mapper.AventurierOpenApiMapper;
+import com.ynov.fantasy_world.infra.mapper.CompetenceOpenApiMapper;
 import com.ynov.fantasy_world.service.AventurierService;
+import com.ynov.fantasy_world.service.CompetenceService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
@@ -20,13 +22,19 @@ public class AventurierController implements AventurierApi {
 
     private final AventurierService aventurierService;
     private final AventurierOpenApiMapper openApiMapper;
+    private final CompetenceService competenceService;
+    private final CompetenceOpenApiMapper competenceMapper;
 
     public AventurierController(
             AventurierService aventurierService,
-            AventurierOpenApiMapper openApiMapper
+            AventurierOpenApiMapper openApiMapper,
+            CompetenceService competenceService,
+            CompetenceOpenApiMapper competenceMapper
     ) {
         this.aventurierService = aventurierService;
         this.openApiMapper = openApiMapper;
+        this.competenceService = competenceService;
+        this.competenceMapper = competenceMapper;
     }
 
     @Override
@@ -44,28 +52,35 @@ public class AventurierController implements AventurierApi {
     }
 
     @Override
-    public ResponseEntity<List<AventurierRef>> getAventuriersByCompetenceId(UUID id) {
-        return null;
+    public ResponseEntity<AventuriersByCompetence> getAventuriersByCompetenceId(UUID id) {
+        var result = competenceService.getAventuriersByCompetenceId(id);
+        return ResponseEntity.ok(competenceMapper.toGeneratedByCompetence(result));
     }
 
     @Override
     public ResponseEntity<List<Competence>> getCompetencesByAventurierId(Long id) {
-        return null;
+        var competences = competenceService.getCompetencesByAventurierId(id).stream()
+                .map(competenceMapper::toGenerated)
+                .toList();
+        return ResponseEntity.ok(competences);
     }
 
     @Override
-    public ResponseEntity<List<Competence>> getCompetencesDisponiblesByAventurierId(Long id) {
-        return null;
+    public ResponseEntity<CompetencesDisponibles> getCompetencesDisponiblesByAventurierId(Long id) {
+        var result = competenceService.getCompetencesDisponibles(id);
+        return ResponseEntity.ok(competenceMapper.toGeneratedDisponibles(result));
     }
 
     @Override
     public ResponseEntity<Void> removeCompetenceFromAventurier(Long id, UUID cId) {
-        return null;
+        competenceService.removeCompetenceFromAventurier(id, cId);
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     public ResponseEntity<Void> addCompetenceToAventurier(Long id, UUID cId) {
-        return null;
+        competenceService.addCompetenceToAventurier(id, cId);
+        return ResponseEntity.noContent().build();
     }
 
     @Override

@@ -1,14 +1,13 @@
 package com.ynov.fantasy_world.infra.dao.entity;
 
 import com.ynov.fantasy_world.domain.model.Classe;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Entity
@@ -33,5 +32,15 @@ public class AventurierEntity {
 
     @Enumerated(EnumType.STRING)
     private Classe classe;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "aventurier_competence",
+            joinColumns = @JoinColumn(name = "aventurier_id"),
+            inverseJoinColumns = @JoinColumn(name = "competence_id")
+    )
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<CompetenceEntity> competences = new HashSet<>();
 }
 

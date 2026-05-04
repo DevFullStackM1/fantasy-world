@@ -708,13 +708,11 @@ paths:
             format: int64
       responses:
         '200':
-          description: Liste des compétences disponibles
+          description: Compétences acquérables et bloquées pour l'aventurier
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Competence'
+                $ref: '#/components/schemas/CompetencesDisponibles'
         '400':
           description: Bad Request
           content:
@@ -874,7 +872,7 @@ paths:
   /api/v1/competences/{id}/aventuriers:
     get:
       summary: Liste les aventuriers possédant une compétence
-      description: Retourne la liste des aventuriers qui possèdent la compétence. Rôle requis -> VIEWER
+      description: Retourne possesseurs et aventuriers éligibles pour une compétence. Rôle requis -> VIEWER
       operationId: getAventuriersByCompetenceId
       tags:
         - Aventurier
@@ -889,13 +887,11 @@ paths:
             format: uuid
       responses:
         '200':
-          description: Liste des aventuriers
+          description: Possesseurs et aventuriers éligibles
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AventurierRef'
+                $ref: '#/components/schemas/AventuriersByCompetence'
         '400':
           description: Bad Request
           content:
@@ -1178,3 +1174,45 @@ components:
           description: Jeton d'accès JWT
       required:
         - accessToken
+
+    CompetencesBloqueesItem:
+      type: object
+      description: Compétence non acquise avec les prérequis manquants
+      properties:
+        competence:
+          $ref: '#/components/schemas/Competence'
+        prerequisManquants:
+          type: array
+          description: Liste lisible des prérequis non satisfaits
+          items:
+            type: string
+
+    CompetencesDisponibles:
+      type: object
+      description: Compétences acquérables et bloquées pour un aventurier
+      properties:
+        acquerables:
+          type: array
+          description: Compétences non encore acquises dont tous les prérequis sont satisfaits
+          items:
+            $ref: '#/components/schemas/Competence'
+        bloquees:
+          type: array
+          description: Compétences non acquises avec leurs prérequis manquants
+          items:
+            $ref: '#/components/schemas/CompetencesBloqueesItem'
+
+    AventuriersByCompetence:
+      type: object
+      description: Possesseurs et aventuriers éligibles pour une compétence
+      properties:
+        possesseurs:
+          type: array
+          description: Aventuriers qui possèdent déjà cette compétence
+          items:
+            $ref: '#/components/schemas/Aventurier'
+        eligibles:
+          type: array
+          description: Aventuriers qui pourraient acquérir cette compétence maintenant
+          items:
+            $ref: '#/components/schemas/Aventurier'
