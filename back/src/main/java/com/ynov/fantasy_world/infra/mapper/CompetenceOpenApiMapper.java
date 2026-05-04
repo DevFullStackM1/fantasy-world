@@ -28,7 +28,7 @@ public class CompetenceOpenApiMapper {
 
         com.ynov.fantasy_world.generated.model.Competence target =
                 new com.ynov.fantasy_world.generated.model.Competence();
-        target.setId(source.getId() != null ? source.getId().toString() : null);
+        target.setId(source.getId() != null ? UUID.fromString(source.getId().toString()) : null);
         target.setNom(source.getNom());
         target.setDescription(source.getDescription());
 
@@ -53,8 +53,7 @@ public class CompetenceOpenApiMapper {
                 pc.setCaracteristiquesMin(cm);
             }
             if (prereq.getCompetencesRequises() != null) {
-                pc.setCompetencesRequises(
-                        prereq.getCompetencesRequises().stream().map(UUID::toString).toList());
+                pc.setCompetencesRequises(List.copyOf(prereq.getCompetencesRequises()));
             }
             target.setPrerequis(pc);
         }
@@ -117,8 +116,7 @@ public class CompetenceOpenApiMapper {
             dto.setCaracteristiqueValeur(cm.getValeur());
         }
         if (pc.getCompetencesRequises() != null) {
-            dto.setCompetencesRequises(
-                    pc.getCompetencesRequises().stream().map(UUID::fromString).toList());
+            dto.setCompetencesRequises(List.copyOf(pc.getCompetencesRequises()));
         }
     }
 
@@ -134,8 +132,7 @@ public class CompetenceOpenApiMapper {
             dto.setCaracteristiqueValeur(cm.getValeur());
         }
         if (pc.getCompetencesRequises() != null) {
-            dto.setCompetencesRequises(
-                    pc.getCompetencesRequises().stream().map(UUID::fromString).toList());
+            dto.setCompetencesRequises(List.copyOf(pc.getCompetencesRequises()));
         }
     }
 }
