@@ -107,7 +107,7 @@
 				<artifactId>openapi-generator-maven-plugin</artifactId>
 				<version>${openapi-generator.version}</version>
 				<configuration>
-					<inputSpec>${project.basedir}/aventurier.openapi.yml</inputSpec>
+					<inputSpec>${project.basedir}/../documentation/openapi/aventurier.openapi.yml</inputSpec>
 					<generatorName>spring</generatorName>
 					<output>${openapi-generator.output}</output>
 					<apiPackage>${openapi-generator.apiPackage}</apiPackage>

@@ -1,8 +1,16 @@
 openapi: 3.1.1
 info:
-  title: Aventurier API
-  version: 1.0.0
-  description: API pour gérer des aventuriers
+  title: Fantasy World — API REST
+  version: 1.1.0
+  description: |
+    API de gestion des aventuriers et des compétences (prérequis, graphe de dépendances).
+
+    **Authentification** : JWT Bearer (OAuth2 Resource Server). Les rôles applicatifs sont portés
+    dans la revendication JWT `scope` sous la forme `ROLE_VIEWER` ou `ROLE_ADMIN`.
+
+    **Erreurs** : corps `application/problem+json` conforme à la RFC 9457 (`ProblemDetail` Spring).
+    Des champs supplémentaires peuvent être présents selon le cas (`errors`, `prerequisManquants`,
+    `aventuriersImpactes` — voir schéma `ProblemDetail`).
 
 tags:
   - name: Aventurier
@@ -14,6 +22,9 @@ tags:
 
 servers:
   - url: http://localhost:8080
+    description: Serveur Spring Boot (port par défaut)
+  - url: http://localhost:5173
+    description: Origine Vite en dev (requêtes `/api` et `/auth` proxifiées vers le back)
 
 security:
   - bearerAuth: []
@@ -346,7 +357,9 @@ paths:
             format: int64
       responses:
         '204':
-          description: Aventurier supprimé
+          description: |
+            Suppression acceptée. L'opération est idempotente : si l'identifiant n'existe pas,
+            la réponse reste 204 (comportement Spring Data `deleteById`).
         '400':
           description: Bad Request
           content:
@@ -568,7 +581,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetail'
         '409':
-          description: Conflict - Violation de règle métier (ex. invalide des aventuriers existants)
+          description: Conflict — la modification laverait les prérequis pour des aventuriers qui possèdent déjà la compétence (voir `aventuriersImpactes` dans le Problem Detail)
           content:
             application/problem+json:
               schema:
@@ -789,13 +802,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetail'
         '404':
-          description: Not Found
+          description: Not Found — aventurier ou compétence inexistant
           content:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/ProblemDetail'
-        '409':
-          description: Conflict - Violation d'invariant métier (prérequis non remplis)
+        '422':
+          description: Unprocessable Entity — prérequis de la compétence non satisfaits
           content:
             application/problem+json:
               schema:
@@ -933,7 +946,9 @@ components:
   schemas:
     ProblemDetail:
       type: object
-      description: RFC 9457 Problem Detail
+      description: |
+        RFC 9457 Problem Detail (Spring `ProblemDetail`). Les propriétés ci-dessous sont des
+        extensions retournées par l'API selon le code HTTP et le gestionnaire d'exceptions.
       properties:
         type:
           type: string
@@ -953,6 +968,58 @@ components:
           type: string
           format: uri
           description: URI identifiant l'occurrence du problème
+        errors:
+          type: array
+          description: Messages de validation (400, `MethodArgumentNotValidException`)
+          items:
+            type: string
+        prerequisManquants:
+          type: array
+          description: Détails structurés des prérequis manquants (422, attribution de compétence)
+          items:
+            $ref: '#/components/schemas/PrerequisManquantInfo'
+        aventuriersImpactes:
+          type: array
+          description: Aventuriers qui ne satisferaient plus les prérequis après la modification (409, mise à jour de compétence)
+          items:
+            $ref: '#/components/schemas/AventurierImpacte'
+
+    PrerequisManquantInfo:
+      type: object
+      description: Élément de diagnostic pour un prérequis non satisfait
+      properties:
+        type:
+          type: string
+          enum:
+            - NIVEAU
+            - CARACTERISTIQUE
+            - CLASSE
+            - COMPETENCE
+        requis:
+          description: Valeur ou libellé attendu (type dépend du champ `type`)
+        actuel:
+          description: Valeur ou état observé côté aventurier
+        caracteristique:
+          type: string
+          description: Nom de la caractéristique lorsque `type` vaut CARACTERISTIQUE
+
+    AventurierImpacte:
+      type: object
+      description: Aventurier bloquant une modification de compétence car il ne respecterait plus les prérequis
+      properties:
+        id:
+          type: integer
+          format: int64
+        nom:
+          type: string
+        prerequisManquants:
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - nom
+        - prerequisManquants
 
     Classe:
       type: string
