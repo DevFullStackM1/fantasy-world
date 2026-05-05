@@ -11,6 +11,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -46,19 +48,21 @@ public class AventurierController implements AventurierApi {
     }
 
     @Override
-    public ResponseEntity<Aventurier> getAventurierById(@NotNull Long id) {
+    public ResponseEntity<Aventurier> getAventurierById(@NotNull @PathVariable("id") Long id) {
         var aventurier = aventurierService.getAventurierById(id);
         return ResponseEntity.ok(openApiMapper.toGenerated(aventurier));
     }
 
     @Override
-    public ResponseEntity<AventuriersByCompetence> getAventuriersByCompetenceId(UUID id) {
+    public ResponseEntity<AventuriersByCompetence> getAventuriersByCompetenceId(
+            @NotNull @PathVariable("id") UUID id
+    ) {
         var result = competenceService.getAventuriersByCompetenceId(id);
         return ResponseEntity.ok(competenceMapper.toGeneratedByCompetence(result));
     }
 
     @Override
-    public ResponseEntity<List<Competence>> getCompetencesByAventurierId(Long id) {
+    public ResponseEntity<List<Competence>> getCompetencesByAventurierId(@NotNull @PathVariable("id") Long id) {
         var competences = competenceService.getCompetencesByAventurierId(id).stream()
                 .map(competenceMapper::toGenerated)
                 .toList();
@@ -66,39 +70,50 @@ public class AventurierController implements AventurierApi {
     }
 
     @Override
-    public ResponseEntity<CompetencesDisponibles> getCompetencesDisponiblesByAventurierId(Long id) {
+    public ResponseEntity<CompetencesDisponibles> getCompetencesDisponiblesByAventurierId(
+            @NotNull @PathVariable("id") Long id
+    ) {
         var result = competenceService.getCompetencesDisponibles(id);
         return ResponseEntity.ok(competenceMapper.toGeneratedDisponibles(result));
     }
 
     @Override
-    public ResponseEntity<Void> removeCompetenceFromAventurier(Long id, UUID cId) {
+    public ResponseEntity<Void> removeCompetenceFromAventurier(
+            @NotNull @PathVariable("id") Long id,
+            @NotNull @PathVariable("cId") UUID cId
+    ) {
         competenceService.removeCompetenceFromAventurier(id, cId);
         return ResponseEntity.noContent().build();
     }
 
     @Override
-    public ResponseEntity<Void> addCompetenceToAventurier(Long id, UUID cId) {
+    public ResponseEntity<Void> addCompetenceToAventurier(
+            @NotNull @PathVariable("id") Long id,
+            @NotNull @PathVariable("cId") UUID cId
+    ) {
         competenceService.addCompetenceToAventurier(id, cId);
         return ResponseEntity.noContent().build();
     }
 
     @Override
-    public ResponseEntity<Aventurier> createAventurier(@Valid AventurierCreate aventurierCreate) {
+    public ResponseEntity<Aventurier> createAventurier(@Valid @RequestBody AventurierCreate aventurierCreate) {
         var createDto = openApiMapper.toCreateDto(aventurierCreate);
         var created = aventurierService.createAventurier(createDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(openApiMapper.toGenerated(created));
     }
 
     @Override
-    public ResponseEntity<Aventurier> updateAventurier(@NotNull Long id, @Valid AventurierUpdate aventurierUpdate) {
+    public ResponseEntity<Aventurier> updateAventurier(
+            @NotNull @PathVariable("id") Long id,
+            @Valid @RequestBody AventurierUpdate aventurierUpdate
+    ) {
         var updateDto = openApiMapper.toUpdateDto(aventurierUpdate);
         var updated = aventurierService.updateAventurier(id, updateDto);
         return ResponseEntity.ok(openApiMapper.toGenerated(updated));
     }
 
     @Override
-    public ResponseEntity<Void> deleteAventurier(@NotNull Long id) {
+    public ResponseEntity<Void> deleteAventurier(@NotNull @PathVariable("id") Long id) {
         aventurierService.deleteAventurier(id);
         return ResponseEntity.noContent().build();
     }

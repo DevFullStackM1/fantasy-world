@@ -1,6 +1,8 @@
 package com.ynov.fantasy_world.infra.exception;
 
 import com.ynov.fantasy_world.domain.exception.*;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.net.URI;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -119,7 +122,22 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ProblemDetail handleGeneral(Exception ex) {
+    public ProblemDetail handleGeneral(Exception ex, HttpServletRequest request) {
+        // Log serveur détaillé; la réponse REST reste volontairement générique.
+        // (Ne pas logger le token: uniquement la présence/absence du header.)
+        String method = request.getMethod();
+        String uri = request.getRequestURI();
+        String query = request.getQueryString();
+        boolean hasAuthHeader = request.getHeader("Authorization") != null;
+
+        log.error(
+                "Erreur non gérée sur {} {}{} (Authorization header présent: {})",
+                method,
+                uri,
+                (query != null ? "?" + query : ""),
+                hasAuthHeader,
+                ex
+        );
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Erreur interne du serveur");
         problem.setTitle("Erreur serveur");
         problem.setType(URI.create("about:blank"));

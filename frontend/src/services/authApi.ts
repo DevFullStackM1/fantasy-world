@@ -1,4 +1,5 @@
 export type AuthResponse = { accessToken: string }
+import { apiFetch } from './apiFetch'
 
 async function tryShowProblem(res: Response) {
   if (res.status === 401 || res.status === 403) return
@@ -46,7 +47,8 @@ export async function register(username: string, password: string): Promise<Auth
 }
 
 export async function logout(): Promise<void> {
-  const res = await fetch('/auth/logout', { method: 'POST' })
+  // Utilise apiFetch pour inclure le Bearer token (endpoint protégé).
+  const res = await apiFetch('/auth/logout', { method: 'POST' })
   if (!res.ok && res.status !== 401) {
     await tryShowProblem(res)
     const text = await res.text().catch(() => '')
