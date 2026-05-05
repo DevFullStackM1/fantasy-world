@@ -19,7 +19,10 @@ fetcher.configure({
   baseUrl: apiBaseUrl,
   init: {
     headers: {
-      Accept: 'application/json',
+      // Certains endpoints (ex: 204 / void) déclarent seulement `application/problem+json` en `produces`.
+      // Pour éviter un 406 (No acceptable representation) quand le back veut répondre en ProblemDetail,
+      // on accepte explicitement les deux.
+      Accept: 'application/json, application/problem+json',
       'Content-Type': 'application/json',
     },
   },
