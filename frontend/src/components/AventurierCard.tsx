@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { components } from '../api/generated/aventurier'
+import { classLabel } from '../ui/classFantasy'
 
 type Aventurier = components['schemas']['Aventurier']
 
@@ -23,7 +24,7 @@ export default function AventurierCard({ aventurier }: { aventurier: Aventurier 
         </div>
         <div className="kv">
           <dt className="kv__k">Classe</dt>
-          <dd className="kv__v">{aventurier.classe}</dd>
+          <dd className="kv__v">{classLabel(aventurier.classe)}</dd>
         </div>
         <div className="kv">
           <dt className="kv__k">Niveau</dt>

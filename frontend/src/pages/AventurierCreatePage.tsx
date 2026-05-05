@@ -5,6 +5,7 @@ import StatusMessage from '../components/StatusMessage'
 import { createAventurier } from '../services/aventuriersApi'
 import type { AventurierCreateInput } from '../services/aventuriersApi'
 import type { components } from '../api/generated/aventurier'
+import { classIcon } from '../ui/classFantasy'
 
 type Aventurier = components['schemas']['Aventurier']
 type Classe = components['schemas']['Classe']
@@ -260,7 +261,7 @@ export default function AventurierCreatePage() {
             >
               {CLASSES.map((c) => (
                 <option key={c} value={c}>
-                  {c}
+                  {classIcon(c)} {c}
                 </option>
               ))}
             </select>

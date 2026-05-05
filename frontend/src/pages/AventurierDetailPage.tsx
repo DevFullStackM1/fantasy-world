@@ -12,6 +12,7 @@ import type { components } from '../api/generated/aventurier'
 import type { CompetencesDisponibles, Competence } from '../services/competencesApi'
 import { useAuth } from '../auth/useAuth'
 import { publishSnackbar } from '../ui/snackbarBus'
+import { classLabel } from '../ui/classFantasy'
 
 type Aventurier = components['schemas']['Aventurier']
 
@@ -26,6 +27,13 @@ type CompetencesSection = {
 }
 
 type Tab = 'acquises' | 'acquerables' | 'bloquees'
+
+function rarityByLevel(level: number): { label: string; tone: 'common' | 'rare' | 'epic' | 'legendary' } {
+  if (level >= 80) return { label: 'Légendaire', tone: 'legendary' }
+  if (level >= 50) return { label: 'Épique', tone: 'epic' }
+  if (level >= 25) return { label: 'Rare', tone: 'rare' }
+  return { label: 'Commun', tone: 'common' }
+}
 
 export default function AventurierDetailPage() {
   const { id } = useParams()
@@ -184,6 +192,16 @@ export default function AventurierDetailPage() {
       {state.status === 'success' ? (
         <article className="detailCard" aria-label="Détails d'un aventurier">
           <h3 className="detailCard__title">{state.data.nom}</h3>
+          <div className="rarityRow">
+            {(() => {
+              const rarity = rarityByLevel(state.data.niveau ?? 0)
+              return (
+                <span className={`rarityBadge rarityBadge--${rarity.tone}`}>
+                  {rarity.label}
+                </span>
+              )
+            })()}
+          </div>
           <div className="heroStats">
             <div className="heroStats__chip">
               <span>Niveau</span>
@@ -191,7 +209,7 @@ export default function AventurierDetailPage() {
             </div>
             <div className="heroStats__chip">
               <span>Classe</span>
-              <strong>{state.data.classe}</strong>
+              <strong>{classLabel(state.data.classe)}</strong>
             </div>
             {isAdmin && (
               <button
@@ -211,7 +229,7 @@ export default function AventurierDetailPage() {
             </div>
             <div className="kvRow">
               <dt className="kvRow__k">Classe</dt>
-              <dd className="kvRow__v">{state.data.classe}</dd>
+              <dd className="kvRow__v">{classLabel(state.data.classe)}</dd>
             </div>
             <div className="kvRow">
               <dt className="kvRow__k">Niveau</dt>
@@ -230,6 +248,35 @@ export default function AventurierDetailPage() {
               <dd className="kvRow__v">{state.data.perception}</dd>
             </div>
           </dl>
+          <section className="statBars" aria-label="Caractéristiques principales">
+            <div className="statBar">
+              <div className="statBar__head">
+                <span>Physique</span>
+                <strong>{state.data.physique}</strong>
+              </div>
+              <div className="statBar__track">
+                <span className="statBar__fill" style={{ width: `${state.data.physique ?? 0}%` }} />
+              </div>
+            </div>
+            <div className="statBar">
+              <div className="statBar__head">
+                <span>Mental</span>
+                <strong>{state.data.mental}</strong>
+              </div>
+              <div className="statBar__track">
+                <span className="statBar__fill" style={{ width: `${state.data.mental ?? 0}%` }} />
+              </div>
+            </div>
+            <div className="statBar">
+              <div className="statBar__head">
+                <span>Perception</span>
+                <strong>{state.data.perception}</strong>
+              </div>
+              <div className="statBar__track">
+                <span className="statBar__fill" style={{ width: `${state.data.perception ?? 0}%` }} />
+              </div>
+            </div>
+          </section>
 
           <div className="detailCard__description">
             <h4 className="srOnly">Description</h4>

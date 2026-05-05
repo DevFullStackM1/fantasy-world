@@ -4,6 +4,7 @@ import Pagination from '../components/Pagination'
 import StatusMessage from '../components/StatusMessage'
 import { listAventuriers } from '../services/aventuriersApi'
 import type { components } from '../api/generated/aventurier'
+import { classLabel } from '../ui/classFantasy'
 
 type Aventurier = components['schemas']['Aventurier']
 
@@ -118,7 +119,7 @@ export default function AventuriersListPage() {
                       <td data-label="Nom">
                         {a.nom}
                       </td>
-                      <td data-label="Classe">{a.classe}</td>
+                      <td data-label="Classe">{classLabel(a.classe)}</td>
                       <td data-label="Niveau">{a.niveau}</td>
                     </tr>
                   ))}

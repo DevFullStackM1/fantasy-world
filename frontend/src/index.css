@@ -1,24 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
-  --text: #5f6272;
-  --text-h: #111827;
-  --bg: #ffffff;
-  --app-bg: #f4f7fb;
-  --border: #e6ebf2;
-  --code-bg: #f2f5fb;
-  --accent: #2563eb;
-  --accent-bg: rgba(37, 99, 235, 0.1);
-  --accent-border: rgba(37, 99, 235, 0.35);
-  --social-bg: rgba(99, 102, 241, 0.1);
+  --text: #d8d3e6;
+  --text-h: #f8f4ff;
+  --bg: #140f1f;
+  --app-bg: #0d0a14;
+  --border: #3a2f56;
+  --code-bg: #211933;
+  --accent: #f3c46e;
+  --accent-bg: rgba(243, 196, 110, 0.14);
+  --accent-border: rgba(243, 196, 110, 0.45);
+  --social-bg: rgba(102, 70, 173, 0.35);
   --shadow:
-    rgba(15, 23, 42, 0.08) 0 8px 30px -12px, rgba(15, 23, 42, 0.05) 0 4px 8px -4px;
+    rgba(6, 4, 10, 0.7) 0 22px 42px -14px, rgba(6, 4, 10, 0.5) 0 10px 18px -8px;
 
   --sans: 'Inter', 'Segoe UI', Roboto, sans-serif;
-  --heading: 'Inter', 'Segoe UI', Roboto, sans-serif;
+  --heading: 'Cinzel', Georgia, serif;
   --mono: ui-monospace, Consolas, monospace;
 
   font: 16px/145% var(--sans);
   letter-spacing: 0.1px;
-  color-scheme: light dark;
+  color-scheme: dark;
   color: var(--text);
   background: var(--app-bg);
   font-synthesis: none;
@@ -28,27 +30,6 @@
 
   @media (max-width: 1024px) {
     font-size: 16px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #98a2b3;
-    --text-h: #f8fafc;
-    --bg: #111827;
-    --app-bg: #0b1220;
-    --border: #1f2937;
-    --code-bg: #0f172a;
-    --accent: #60a5fa;
-    --accent-bg: rgba(96, 165, 250, 0.2);
-    --accent-border: rgba(96, 165, 250, 0.4);
-    --social-bg: rgba(148, 163, 184, 0.14);
-    --shadow:
-      rgba(2, 6, 23, 0.5) 0 16px 36px -16px, rgba(2, 6, 23, 0.35) 0 6px 12px -6px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
   }
 }
 
@@ -67,21 +48,28 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  background: var(--bg);
-  border-left: 1px solid var(--border);
-  border-right: 1px solid var(--border);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(125, 79, 255, 0.2), transparent 40%),
+    radial-gradient(circle at 90% 10%, rgba(243, 196, 110, 0.13), transparent 42%),
+    var(--bg);
+  border-left: 1px solid rgba(243, 196, 110, 0.15);
+  border-right: 1px solid rgba(243, 196, 110, 0.15);
 }
 
 body {
   margin: 0;
-  background: radial-gradient(circle at top, rgba(37, 99, 235, 0.08), transparent 35%), var(--app-bg);
+  background:
+    radial-gradient(circle at top, rgba(125, 79, 255, 0.25), transparent 38%),
+    radial-gradient(circle at 20% 100%, rgba(243, 196, 110, 0.1), transparent 35%),
+    var(--app-bg);
 }
 
 h1,
 h2 {
   font-family: var(--heading);
-  font-weight: 500;
+  font-weight: 700;
   color: var(--text-h);
+  letter-spacing: 0.4px;
 }
 
 h1 {
