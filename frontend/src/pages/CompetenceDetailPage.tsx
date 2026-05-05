@@ -5,6 +5,7 @@ import {
   getCompetenceById,
   getAventuriersByCompetenceId,
   deleteCompetence,
+  listCompetences,
 } from '../services/competencesApi'
 import type { Competence, AventuriersByCompetence } from '../services/competencesApi'
 import { useAuth } from '../auth/useAuth'
@@ -23,11 +24,10 @@ export default function CompetenceDetailPage() {
   const [compState, setCompState] = useState<ApiState<Competence>>({ status: 'loading' })
   const [avState, setAvState] = useState<ApiState<AventuriersByCompetence>>({ status: 'loading' })
   const [deleting, setDeleting] = useState(false)
+  const [competenceNameById, setCompetenceNameById] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (!id) return
-    setCompState({ status: 'loading' })
-    setAvState({ status: 'loading' })
 
     getCompetenceById(id)
       .then((data) => setCompState({ status: 'success', data }))
@@ -40,6 +40,18 @@ export default function CompetenceDetailPage() {
       .catch((e: unknown) =>
         setAvState({ status: 'error', error: e instanceof Error ? e.message : 'Erreur' }),
       )
+
+    // Pour afficher les noms des compétences requises (plutôt que les UUID).
+    // En cas d'échec, on garde simplement l'affichage par ID.
+    listCompetences()
+      .then((all) => {
+        const map: Record<string, string> = {}
+        all.forEach((c) => {
+          if (c.id && c.nom) map[c.id] = c.nom
+        })
+        setCompetenceNameById(map)
+      })
+      .catch(() => {})
   }, [id])
 
   async function handleDelete() {
@@ -136,7 +148,9 @@ export default function CompetenceDetailPage() {
                     <div className="kvRow">
                       <dt className="kvRow__k">Compétences requises</dt>
                       <dd className="kvRow__v">
-                        {compState.data.prerequis.competencesRequises.join(', ')}
+                        {compState.data.prerequis.competencesRequises
+                          .map((cid) => competenceNameById[cid] ?? cid)
+                          .join(', ')}
                       </dd>
                     </div>
                   )}
