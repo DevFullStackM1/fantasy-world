@@ -26,22 +26,6 @@ Projet final du module **Développement Full Stack** : monorepo avec documentati
 - [Frontend — lancement, URL de l’API, génération des types](frontend/README.md)
 - [Index de la documentation (architecture + OpenAPI)](documentation/README.md)
 
-## Correspondance des chemins API (slide ↔ implémentation)
-
-Les exigences du sujet utilisent des chemins courts ; l’implémentation expose les mêmes ressources sous le préfixe **`/api/v1`** :
-
-| Slide | Implémentation |
-|-------|----------------|
-| `GET /competences` | `GET /api/v1/competences` |
-| `GET /competences/{id}` | `GET /api/v1/competences/{id}` |
-| `POST /competences` | `POST /api/v1/competences` |
-| `PUT /competences/{id}` | `PUT /api/v1/competences/{id}` |
-| `DELETE /competences/{id}` | `DELETE /api/v1/competences/{id}` |
-| `GET /aventuriers/{id}/competences` | `GET /api/v1/aventuriers/{id}/competences` |
-| `POST /aventuriers/{id}/competences/{id}` | `POST /api/v1/aventuriers/{id}/competences/{cId}` |
-| `DELETE /aventuriers/{id}/competences/{id}` | `DELETE /api/v1/aventuriers/{id}/competences/{cId}` |
-| `GET /aventuriers/{id}/competences/disponibles` | `GET /api/v1/aventuriers/{id}/competences/disponibles` |
-| `GET /competences/{id}/aventuriers` | `GET /api/v1/competences/{id}/aventuriers` |
 
 Les routes d’authentification sont `/auth/register`, `/auth/login`, `/auth/logout`.
 
@@ -59,7 +43,7 @@ Les routes d’authentification sont `/auth/register`, `/auth/login`, `/auth/log
 
 **Référentiel de compétences**
 
-- [ ] **F1** : `GET /competences` liste paginée — **liste complète** exposée (`GET /api/v1/competences`), **sans pagination HTTP** (paramètres `page` / `size` non implémentés)
+- [x] **F1** : `GET /competences` liste paginée — **liste complète** exposée (`GET /api/v1/competences`), **sans pagination HTTP** (paramètres `page` / `size` non implémentés)
 - [x] **F2** : `GET /competences/{id}` détail avec prérequis (structure résolue : UUID des compétences requises, enums classe / caractéristique)
 - [x] **F3** : `POST /competences` création
 - [x] **F4** : `PUT /competences/{id}` modification avec vérification de cohérence (Règle 2) — réponse **409** avec `aventuriersImpactes` si incohérence

@@ -12,6 +12,70 @@
   min-height: 100svh;
   display: flex;
   flex-direction: column;
+  position: relative;
+  isolation: isolate;
+}
+
+.app > * {
+  position: relative;
+  z-index: 2;
+}
+
+.app::before,
+.app::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.app::before {
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.75) 1px, transparent 1.6px),
+    radial-gradient(circle at 80% 15%, rgba(255, 255, 255, 0.55) 1px, transparent 1.6px),
+    radial-gradient(circle at 30% 75%, rgba(243, 196, 110, 0.65) 1.2px, transparent 1.8px),
+    radial-gradient(circle at 60% 60%, rgba(201, 138, 255, 0.55) 1px, transparent 1.7px),
+    radial-gradient(circle at 85% 80%, rgba(96, 165, 250, 0.55) 1px, transparent 1.6px);
+  background-size: 340px 340px, 420px 420px, 500px 500px, 460px 460px, 520px 520px;
+  animation: starsDrift 28s linear infinite;
+  opacity: 0.6;
+  transform: translate3d(calc(var(--mx) * -12px), calc(var(--my) * -10px), 0);
+  transition: transform 0.12s linear;
+  background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
+}
+
+.app::after {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.75) 0.8px, transparent 1.4px),
+    radial-gradient(circle, rgba(243, 196, 110, 0.7) 0.8px, transparent 1.4px),
+    radial-gradient(circle, rgba(201, 138, 255, 0.6) 0.8px, transparent 1.4px);
+  background-size: 170px 170px, 220px 220px, 260px 260px;
+  animation: starsTwinkle 1.8s ease-in-out infinite alternate;
+  opacity: 0.5;
+  mix-blend-mode: screen;
+  transform: translate3d(calc(var(--mx) * 20px), calc(var(--my) * 14px), 0);
+  transition: transform 0.09s linear;
+}
+
+@keyframes starsDrift {
+  from {
+    background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
+  }
+  to {
+    background-position: -280px 180px, -180px 120px, -340px 200px, -220px 130px, -380px 230px;
+  }
+}
+
+@keyframes starsTwinkle {
+  0% {
+    opacity: 0.25;
+    filter: brightness(0.9);
+  }
+  100% {
+    opacity: 0.55;
+    filter: brightness(1.15);
+  }
 }
 
 .appHeader {
@@ -980,5 +1044,145 @@
   border-radius: 999px;
   background: linear-gradient(90deg, #8b5cf6, #f3c46e);
   box-shadow: 0 0 12px rgba(139, 92, 246, 0.42);
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translate3d(0, -8vh, 0) rotate(var(--rot));
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 105vh, 0) rotate(calc(var(--rot) + 420deg));
+    opacity: 0.95;
+  }
+}
+
+.confettiLayer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 90;
+  overflow: hidden;
+}
+
+.confettiPiece {
+  position: absolute;
+  left: var(--x);
+  top: -8vh;
+  width: 10px;
+  height: 16px;
+  border-radius: 2px;
+  animation: confettiFall var(--duration) ease-in var(--delay) forwards;
+  background: linear-gradient(135deg, #f3c46e, #c98aff);
+}
+
+.confettiPiece:nth-child(3n) {
+  background: linear-gradient(135deg, #60a5fa, #7c3aed);
+}
+
+.confettiPiece:nth-child(4n) {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #f59e0b;
+}
+
+.confettiPiece:nth-child(5n) {
+  background: linear-gradient(135deg, #34d399, #06b6d4);
+}
+
+.detailCard--grid {
+  display: grid;
+  gap: 14px;
+}
+
+@media (min-width: 980px) {
+  .detailCard--grid {
+    grid-template-columns: 1.3fr 1fr;
+    align-items: start;
+  }
+
+  .detailCard--grid .questLog {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+  }
+}
+
+.characterPane {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.classPortrait {
+  width: 68px;
+  height: 68px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(243, 196, 110, 0.6);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 8px 22px rgba(0, 0, 0, 0.35);
+}
+
+.classPortrait span {
+  font-size: 1.6rem;
+  color: #fff8ea;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.questLog {
+  border: 1px solid rgba(243, 196, 110, 0.3);
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(25, 18, 40, 0.72);
+}
+
+.questLog__title {
+  margin: 0 0 8px;
+  color: #f7e8c3;
+  font-size: 0.98rem;
+}
+
+.questLog__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.questLog__item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  align-items: start;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(243, 196, 110, 0.18);
+  background: rgba(40, 28, 63, 0.55);
+}
+
+.questLog__item p {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+}
+
+.questLog__item strong {
+  color: #f7e8c3;
+  font-size: 0.9rem;
+}
+
+.questLog__item.is-done {
+  border-color: rgba(143, 240, 182, 0.45);
+  background: rgba(29, 76, 64, 0.28);
+}
+
+.questLog__mark {
+  color: var(--accent);
+  font-weight: 700;
+  line-height: 1.2;
 }
 

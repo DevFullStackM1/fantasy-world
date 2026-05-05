@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import StatusMessage from '../components/StatusMessage'
 import { getAventurierById, updateAventurier } from '../services/aventuriersApi'
@@ -12,7 +13,7 @@ import type { components } from '../api/generated/aventurier'
 import type { CompetencesDisponibles, Competence } from '../services/competencesApi'
 import { useAuth } from '../auth/useAuth'
 import { publishSnackbar } from '../ui/snackbarBus'
-import { classLabel } from '../ui/classFantasy'
+import { classIcon, classLabel, classPortraitStyle } from '../ui/classFantasy'
 
 type Aventurier = components['schemas']['Aventurier']
 
@@ -45,6 +46,7 @@ export default function AventurierDetailPage() {
   const [activeTab, setActiveTab] = useState<Tab>('acquises')
   const [actionPending, setActionPending] = useState<string | null>(null)
   const [levelPending, setLevelPending] = useState(false)
+  const [showConfetti, setShowConfetti] = useState(false)
 
   const parsedId = useMemo(() => {
     if (!id) return null
@@ -52,6 +54,38 @@ export default function AventurierDetailPage() {
     if (!Number.isFinite(num)) return null
     return num
   }, [id])
+
+  const questLog = useMemo(() => {
+    if (state.status !== 'success') return []
+    const level = state.data.niveau ?? 0
+    const base = [
+      {
+        title: 'Ascension',
+        done: level >= 10,
+        detail: level >= 10 ? 'Niveau 10 atteint.' : `Atteindre le niveau 10 (${level}/10).`,
+      },
+      {
+        title: 'Spécialisation',
+        done: compState.status === 'success' && compState.data.acquises.length >= 3,
+        detail:
+          compState.status === 'success'
+            ? `${compState.data.acquises.length}/3 compétences acquises.`
+            : 'Analyser les compétences acquises.',
+      },
+      {
+        title: 'Maîtrise des prérequis',
+        done:
+          compState.status === 'success' &&
+          (compState.data.disponibles.bloquees?.length ?? 0) === 0,
+        detail:
+          compState.status === 'success'
+            ? `${compState.data.disponibles.bloquees?.length ?? 0} compétence(s) encore bloquée(s).`
+            : 'Attente des données de compétences.',
+      },
+    ]
+    return base
+  }, [state, compState])
+
 
   async function loadAventurier() {
     setState({ status: 'loading' })
@@ -137,6 +171,8 @@ export default function AventurierDetailPage() {
     try {
       await updateAventurier(parsedId, { niveau: nextLevel })
       await Promise.all([loadAventurier(), loadCompetences()])
+      setShowConfetti(true)
+      window.setTimeout(() => setShowConfetti(false), 1700)
       publishSnackbar({
         kind: 'success',
         message: `Niveau monté à ${nextLevel}.`,
@@ -169,6 +205,24 @@ export default function AventurierDetailPage() {
 
   return (
     <section className="page" aria-busy={state.status === 'loading'}>
+      {showConfetti ? (
+        <div className="confettiLayer" aria-hidden="true">
+          {Array.from({ length: 36 }).map((_, i) => (
+            <span
+              key={i}
+              className="confettiPiece"
+              style={
+                {
+                  ['--x' as string]: `${(i * 17) % 100}%`,
+                  ['--delay' as string]: `${(i % 9) * 0.05}s`,
+                  ['--duration' as string]: `${1.2 + (i % 6) * 0.15}s`,
+                  ['--rot' as string]: `${(i * 23) % 360}deg`,
+                } as CSSProperties
+              }
+            />
+          ))}
+        </div>
+      ) : null}
       <header className="pageHeader">
         <h2 className="pageTitle">Détail</h2>
         <div className="pageHeader__actions">
@@ -190,8 +244,17 @@ export default function AventurierDetailPage() {
       ) : null}
 
       {state.status === 'success' ? (
-        <article className="detailCard" aria-label="Détails d'un aventurier">
-          <h3 className="detailCard__title">{state.data.nom}</h3>
+        <article className="detailCard detailCard--grid" aria-label="Détails d'un aventurier">
+          <div className="characterPane">
+            <div
+              className="classPortrait"
+              style={{ background: classPortraitStyle(state.data.classe) }}
+              aria-label={`Portrait ${state.data.classe}`}
+            >
+              <span>{classIcon(state.data.classe)}</span>
+            </div>
+            <h3 className="detailCard__title">{state.data.nom}</h3>
+          </div>
           <div className="rarityRow">
             {(() => {
               const rarity = rarityByLevel(state.data.niveau ?? 0)
@@ -216,7 +279,9 @@ export default function AventurierDetailPage() {
                 type="button"
                 className="btn btn--primary"
                 disabled={levelPending}
-                onClick={handleLevelUp}
+                onClick={() => {
+                  void handleLevelUp()
+                }}
               >
                 {levelPending ? 'Mise à jour…' : '+1 niveau'}
               </button>
@@ -286,6 +351,20 @@ export default function AventurierDetailPage() {
               <p className="muted">Pas de description.</p>
             )}
           </div>
+          <aside className="questLog" aria-label="Journal de quêtes">
+            <h4 className="questLog__title">Journal de quêtes</h4>
+            <ul className="questLog__list">
+              {questLog.map((q) => (
+                <li key={q.title} className={`questLog__item ${q.done ? 'is-done' : ''}`}>
+                  <span className="questLog__mark">{q.done ? '✓' : '◌'}</span>
+                  <div>
+                    <strong>{q.title}</strong>
+                    <p className="muted">{q.detail}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </aside>
         </article>
       ) : null}
 
@@ -300,7 +379,9 @@ export default function AventurierDetailPage() {
               key={tab}
               type="button"
               className={`btn ${activeTab === tab ? 'btn--primary' : ''}`}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => {
+                setActiveTab(tab)
+              }}
             >
               {tab === 'acquises' && 'Acquises'}
               {tab === 'acquerables' && 'Acquérables'}
@@ -340,7 +421,9 @@ export default function AventurierDetailPage() {
                             className="btn"
                             style={{ marginLeft: 'auto', color: 'var(--danger)' }}
                             disabled={actionPending === c.id}
-                            onClick={() => handleRemove(c.id!)}
+                            onClick={() => {
+                              void handleRemove(c.id!)
+                            }}
                           >
                             {actionPending === c.id ? '…' : 'Retirer'}
                           </button>
@@ -375,7 +458,9 @@ export default function AventurierDetailPage() {
                             className="btn btn--primary"
                             style={{ marginLeft: 'auto' }}
                             disabled={actionPending === c.id}
-                            onClick={() => handleAdd(c.id!)}
+                            onClick={() => {
+                              void handleAdd(c.id!)
+                            }}
                           >
                             {actionPending === c.id ? '…' : 'Ajouter'}
                           </button>

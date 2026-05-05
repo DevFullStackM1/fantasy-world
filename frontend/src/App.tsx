@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link, Navigate, Route, Routes } from 'react-router-dom'
 import AventurierCreatePage from './pages/AventurierCreatePage'
 import AventurierDetailPage from './pages/AventurierDetailPage'
@@ -18,6 +19,35 @@ import SnackbarHost from './ui/SnackbarHost'
 export default function App() {
   const { user, role, logout, isAuthenticated } = useAuth()
   const isAdmin = role === 'ADMIN'
+
+  useEffect(() => {
+    let raf = 0
+    const root = document.documentElement
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (raf) cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => {
+        const nx = (event.clientX / window.innerWidth) * 2 - 1
+        const ny = (event.clientY / window.innerHeight) * 2 - 1
+        root.style.setProperty('--mx', nx.toFixed(4))
+        root.style.setProperty('--my', ny.toFixed(4))
+      })
+    }
+
+    const onLeave = () => {
+      root.style.setProperty('--mx', '0')
+      root.style.setProperty('--my', '0')
+    }
+
+    window.addEventListener('pointermove', onPointerMove)
+    window.addEventListener('pointerleave', onLeave)
+
+    return () => {
+      if (raf) cancelAnimationFrame(raf)
+      window.removeEventListener('pointermove', onPointerMove)
+      window.removeEventListener('pointerleave', onLeave)
+    }
+  }, [])
 
   return (
     <div className="app">
