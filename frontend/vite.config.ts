@@ -9,15 +9,17 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset()] })
   ],
   server: {
+    host: true,
+    port: 5173,
     proxy: {
       // Proxy Vite pour éviter les problèmes CORS en dev.
       // Toute requête vers /api et /auth sera relayée au back.
       '/api': {
-        target: 'http://localhost:8080',
+        target: process.env.BACKEND_URL ?? 'http://localhost:8080',
         changeOrigin: true,
       },
       '/auth': {
-        target: 'http://localhost:8080',
+        target: process.env.BACKEND_URL ?? 'http://localhost:8080',
         changeOrigin: true,
       },
     },

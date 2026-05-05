@@ -26,6 +26,34 @@ Projet final du module **Développement Full Stack** : monorepo avec documentati
 - [Frontend — lancement, URL de l’API, génération des types](frontend/README.md)
 - [Index de la documentation (architecture + OpenAPI)](documentation/README.md)
 
+## Lancement en Docker (tout-en-un)
+
+Prérequis : Docker Desktop (ou Docker Engine + Compose plugin) installé et démarré.
+
+Depuis la racine du projet :
+
+```bash
+docker compose up --build
+```
+
+Accès :
+
+- Frontend : [http://localhost:5173](http://localhost:5173)
+- Backend API : [http://localhost:8080](http://localhost:8080)
+- MongoDB (port exposé local) : `localhost:27018`
+
+Arrêter la stack :
+
+```bash
+docker compose down
+```
+
+Arrêter + supprimer les volumes (réinitialiser les données Mongo) :
+
+```bash
+docker compose down -v
+```
+
 
 Les routes d’authentification sont `/auth/register`, `/auth/login`, `/auth/logout`.
 

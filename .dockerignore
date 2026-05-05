@@ -1,0 +1,10 @@
+.git
+.idea
+**/.idea
+**/target
+**/node_modules
+**/dist
+**/.cursor
+**/*.log
+terminals
+agent-transcripts

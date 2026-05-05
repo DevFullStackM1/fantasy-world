@@ -1,0 +1,40 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: fantasy-mongodb
+    restart: unless-stopped
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: fantasy-backend
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/fantasy
+      SPRING_DATA_MONGODB_DATABASE: fantasy-world-logs
+      SPRING_AUTOCONFIGURE_EXCLUDE: de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: fantasy-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      BACKEND_URL: http://backend:8080
+    ports:
+      - "5173:5173"
+
+volumes:
+  mongo_data:
