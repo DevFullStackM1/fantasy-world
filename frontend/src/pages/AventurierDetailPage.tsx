@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import StatusMessage from '../components/StatusMessage'
-import { getAventurierById } from '../services/aventuriersApi'
+import { getAventurierById, updateAventurier } from '../services/aventuriersApi'
 import {
   getCompetencesByAventurierId,
   getCompetencesDisponibles,
@@ -11,6 +11,7 @@ import {
 import type { components } from '../api/generated/aventurier'
 import type { CompetencesDisponibles, Competence } from '../services/competencesApi'
 import { useAuth } from '../auth/useAuth'
+import { publishSnackbar } from '../ui/snackbarBus'
 
 type Aventurier = components['schemas']['Aventurier']
 
@@ -35,6 +36,7 @@ export default function AventurierDetailPage() {
   const [compState, setCompState] = useState<ApiState<CompetencesSection>>({ status: 'loading' })
   const [activeTab, setActiveTab] = useState<Tab>('acquises')
   const [actionPending, setActionPending] = useState<string | null>(null)
+  const [levelPending, setLevelPending] = useState(false)
 
   const parsedId = useMemo(() => {
     if (!id) return null
@@ -42,6 +44,20 @@ export default function AventurierDetailPage() {
     if (!Number.isFinite(num)) return null
     return num
   }, [id])
+
+  async function loadAventurier() {
+    setState({ status: 'loading' })
+    try {
+      if (parsedId === null) return
+      const data = await getAventurierById(parsedId)
+      setState({ status: 'success', data })
+    } catch (e) {
+      setState({
+        status: 'error',
+        error: e instanceof Error ? e.message : 'Erreur inconnue',
+      })
+    }
+  }
 
   function loadCompetences() {
     if (parsedId === null) return
@@ -63,28 +79,8 @@ export default function AventurierDetailPage() {
   }
 
   useEffect(() => {
-    let cancelled = false
-
-    async function load() {
-      setState({ status: 'loading' })
-      try {
-        if (parsedId === null) return
-        const data = await getAventurierById(parsedId)
-        if (cancelled) return
-        setState({ status: 'success', data })
-      } catch (e) {
-        if (cancelled) return
-        setState({
-          status: 'error',
-          error: e instanceof Error ? e.message : 'Erreur inconnue',
-        })
-      }
-    }
-
-    load()
-    return () => {
-      cancelled = true
-    }
+    if (parsedId === null) return
+    loadAventurier()
   }, [parsedId])
 
   useEffect(() => {
@@ -97,8 +93,12 @@ export default function AventurierDetailPage() {
     try {
       await addCompetenceToAventurier(parsedId, competenceId)
       loadCompetences()
+      publishSnackbar({ kind: 'success', message: 'Compétence ajoutée.' })
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Erreur lors de l\'ajout.')
+      publishSnackbar({
+        kind: 'error',
+        message: e instanceof Error ? e.message : 'Erreur lors de l\'ajout.',
+      })
     } finally {
       setActionPending(null)
     }
@@ -110,10 +110,36 @@ export default function AventurierDetailPage() {
     try {
       await removeCompetenceFromAventurier(parsedId, competenceId)
       loadCompetences()
+      publishSnackbar({ kind: 'success', message: 'Compétence retirée.' })
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Erreur lors du retrait.')
+      publishSnackbar({
+        kind: 'error',
+        message: e instanceof Error ? e.message : 'Erreur lors du retrait.',
+      })
     } finally {
       setActionPending(null)
+    }
+  }
+
+  async function handleLevelUp() {
+    if (parsedId === null || state.status !== 'success' || levelPending) return
+    const current = state.data.niveau ?? 0
+    const nextLevel = current + 1
+    setLevelPending(true)
+    try {
+      await updateAventurier(parsedId, { niveau: nextLevel })
+      await Promise.all([loadAventurier(), loadCompetences()])
+      publishSnackbar({
+        kind: 'success',
+        message: `Niveau monté à ${nextLevel}.`,
+      })
+    } catch (e) {
+      publishSnackbar({
+        kind: 'error',
+        message: e instanceof Error ? e.message : 'Impossible de monter de niveau.',
+      })
+    } finally {
+      setLevelPending(false)
     }
   }
 
@@ -158,6 +184,26 @@ export default function AventurierDetailPage() {
       {state.status === 'success' ? (
         <article className="detailCard" aria-label="Détails d'un aventurier">
           <h3 className="detailCard__title">{state.data.nom}</h3>
+          <div className="heroStats">
+            <div className="heroStats__chip">
+              <span>Niveau</span>
+              <strong>{state.data.niveau}</strong>
+            </div>
+            <div className="heroStats__chip">
+              <span>Classe</span>
+              <strong>{state.data.classe}</strong>
+            </div>
+            {isAdmin && (
+              <button
+                type="button"
+                className="btn btn--primary"
+                disabled={levelPending}
+                onClick={handleLevelUp}
+              >
+                {levelPending ? 'Mise à jour…' : '+1 niveau'}
+              </button>
+            )}
+          </div>
           <dl className="kvGrid">
             <div className="kvRow">
               <dt className="kvRow__k">ID</dt>
@@ -197,21 +243,16 @@ export default function AventurierDetailPage() {
       ) : null}
 
       {/* Section compétences */}
-      <section style={{ marginTop: 16 }}>
-        <h3 style={{ margin: '0 0 10px', fontSize: 18, fontWeight: 650 }}>Compétences</h3>
+      <section className="competencesSection">
+        <h3 className="sectionTitle">Compétences</h3>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
+        <div className="tabs">
           {(['acquises', 'acquerables', 'bloquees'] as Tab[]).map((tab) => (
             <button
               key={tab}
               type="button"
-              className="btn"
-              style={
-                activeTab === tab
-                  ? { background: 'var(--accent-bg)', borderColor: 'var(--accent-border)' }
-                  : {}
-              }
+              className={`btn ${activeTab === tab ? 'btn--primary' : ''}`}
               onClick={() => setActiveTab(tab)}
             >
               {tab === 'acquises' && 'Acquises'}
@@ -235,17 +276,14 @@ export default function AventurierDetailPage() {
                 {compState.data.acquises.length === 0 ? (
                   <p className="muted">Cet aventurier n'a pas encore de compétences.</p>
                 ) : (
-                  <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none', display: 'grid', gap: 6 }}>
+                  <ul className="competenceList">
                     {compState.data.acquises.map((c) => (
-                      <li
-                        key={c.id}
-                        style={{ display: 'flex', alignItems: 'center', gap: 10 }}
-                      >
+                      <li key={c.id} className="competenceList__item">
                         <Link to={`/competences/${c.id}`} className="tableLink">
                           {c.nom}
                         </Link>
                         {c.description && (
-                          <span className="muted" style={{ fontSize: '0.875em' }}>
+                          <span className="muted competenceList__meta">
                             — {c.description.length > 60 ? c.description.slice(0, 60) + '…' : c.description}
                           </span>
                         )}
@@ -253,7 +291,7 @@ export default function AventurierDetailPage() {
                           <button
                             type="button"
                             className="btn"
-                            style={{ marginLeft: 'auto', padding: '4px 10px', color: 'var(--danger)' }}
+                            style={{ marginLeft: 'auto', color: 'var(--danger)' }}
                             disabled={actionPending === c.id}
                             onClick={() => handleRemove(c.id!)}
                           >
@@ -273,17 +311,14 @@ export default function AventurierDetailPage() {
                 compState.data.disponibles.acquerables.length === 0 ? (
                   <p className="muted">Aucune compétence acquérable pour l'instant.</p>
                 ) : (
-                  <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none', display: 'grid', gap: 6 }}>
+                  <ul className="competenceList">
                     {compState.data.disponibles.acquerables.map((c) => (
-                      <li
-                        key={c.id}
-                        style={{ display: 'flex', alignItems: 'center', gap: 10 }}
-                      >
+                      <li key={c.id} className="competenceList__item">
                         <Link to={`/competences/${c.id}`} className="tableLink">
                           {c.nom}
                         </Link>
                         {c.description && (
-                          <span className="muted" style={{ fontSize: '0.875em' }}>
+                          <span className="muted competenceList__meta">
                             — {c.description.length > 60 ? c.description.slice(0, 60) + '…' : c.description}
                           </span>
                         )}
@@ -291,7 +326,7 @@ export default function AventurierDetailPage() {
                           <button
                             type="button"
                             className="btn btn--primary"
-                            style={{ marginLeft: 'auto', padding: '4px 10px' }}
+                            style={{ marginLeft: 'auto' }}
                             disabled={actionPending === c.id}
                             onClick={() => handleAdd(c.id!)}
                           >
@@ -311,14 +346,14 @@ export default function AventurierDetailPage() {
                 compState.data.disponibles.bloquees.length === 0 ? (
                   <p className="muted">Aucune compétence bloquée.</p>
                 ) : (
-                  <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none', display: 'grid', gap: 10 }}>
+                  <ul className="blockedList">
                     {compState.data.disponibles.bloquees.map((item) => (
                       <li key={item.competence?.id}>
                         <Link to={`/competences/${item.competence?.id}`} className="tableLink">
                           {item.competence?.nom}
                         </Link>
                         {item.prerequisManquants && item.prerequisManquants.length > 0 && (
-                          <ul style={{ margin: '4px 0 0', paddingLeft: 18, fontSize: '0.875em' }}>
+                          <ul className="blockedList__missing">
                             {item.prerequisManquants.map((m, i) => (
                               <li key={i} className="muted">
                                 {m}

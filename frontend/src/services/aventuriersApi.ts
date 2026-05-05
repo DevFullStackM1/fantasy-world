@@ -4,6 +4,7 @@ import type { components } from '../api/generated/aventurier'
 type Aventurier = components['schemas']['Aventurier']
 type ProblemDetail = components['schemas']['ProblemDetail']
 type Classe = components['schemas']['Classe']
+type AventurierUpdate = components['schemas']['AventurierUpdate']
 
 export type AventurierCreateInput = {
   nom: string
@@ -20,6 +21,7 @@ const getByIdOperation = fetcher
   .method('get')
   .create()
 const createOperation = fetcher.path('/api/v1/aventuriers').method('post').create()
+const updateOperation = fetcher.path('/api/v1/aventuriers/{id}').method('patch').create()
 
 function asProblemDetail(data: unknown): ProblemDetail | null {
   if (!data || typeof data !== 'object') return null
@@ -75,6 +77,19 @@ export async function createAventurier(
     // Le type généré pour AventurierCreate est trop strict à cause d'une intersection
     // (Record<string, never>). L'objet runtime est correct, on caste donc au moment de l'appel.
     const { data } = await createOperation(payload as unknown as never)
+    return data
+  } catch (e) {
+    const problem = extractProblemDetailFromOperationError(e)
+    throw new Error(problem?.detail ?? problem?.title ?? errorToMessage(e))
+  }
+}
+
+export async function updateAventurier(
+  id: number,
+  payload: AventurierUpdate,
+): Promise<Aventurier> {
+  try {
+    const { data } = await updateOperation({ id, ...payload } as unknown as never)
     return data
   } catch (e) {
     const problem = extractProblemDetailFromOperationError(e)
